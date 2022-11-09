@@ -13,9 +13,10 @@
 #define GAME_SIZE 20
 
 byte sequence[GAME_SIZE];
-unsigned int sounds[4] = { 2093, 2349, 2637, 3136 };
+unsigned int sounds[4] = { 1047, 1319, 1568, 1976 };
 
-byte leds[4] = { 0, 1, 3 };
+byte leds[3] = { 0, 1, 3 };
+byte ledsMap[4] = { 3, 2, 1, 0 };
 
 void setLed(int number, int state) {
 
@@ -34,8 +35,18 @@ void getRandomSeed() {
 }
 
 void setup() {
-  for (byte i = 0; i < 4; i++) {
+  for (byte i = 0; i < 3; i++) {
     pinMode(leds[i], OUTPUT);
+  }
+
+  while (true) {
+
+    for (byte i = 0; i < 4; i++) {
+      tone(BUZZER_PIN, sounds[i]);
+      delay(500);
+      noTone();
+      delay(500);
+    }
   }
 
   //Gera sequencia de números aleatórios
@@ -68,27 +79,30 @@ void win() {
 }
 
 void lose() {
+  byte sequence[4] = { 0, 2, 1, 3 };
+
   while (true) {
-    tone(BUZZER_PIN, 300);
     for (byte i = 0; i < 4; i++) {
-      setLed(i, HIGH);
+      tone(BUZZER_PIN, 300);
+      setLed(sequence[i], HIGH);
+      delay(200);
+      noTone(BUZZER_PIN);
+      setLed(sequence[i], LOW);
+      delay(200);
     }
-    delay(200);
-    noTone(BUZZER_PIN);
-    for (byte i = 0; i < 4; i++) {
-      setLed(i, LOW);
-    }
-    delay(200);
-  };
+  }
 }
 
 int input() {
+
+  byte inputMap[4] = { 3, 2, 1, 0 };
+
   while (true) {
     int currentRead = analogRead(INPUT_PIN);
 
     for (int i = 1; i < 5; i++) {
       if ((currentRead > (i * QUARTER_ANALOG_READ) - INPUT_DEADZONE) && (currentRead < (i * QUARTER_ANALOG_READ) + INPUT_DEADZONE))
-        return i - 1;
+        return inputMap[i - 1];
     }
   }
 }
